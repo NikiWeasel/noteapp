@@ -1,18 +1,43 @@
 import 'package:flutter/material.dart';
+import 'stuff.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class Stuff{
-  String name = 'Unknown';
-  String info = 'Unknown';
 
-  Stuff(String name, String info){
-    this.name = name;
-    this.info = info;
+Future<Users> fetchUser() async {
+  final response = await http.get(Uri.parse('https://my-json-server.typicode.com/NikiWeasel/demo1/users/1'));
+  //https://my-json-server.typicode.com/NikiWeasel/demo1/users/1
+  //http://192.168.0.106/users/1
+  //http://localhost:3000/users/1
+  //https://my-json-server.typicode.com/NikiWeasel/demo/users/1
+
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    return Users.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw Exception('Failed to load');
   }
 }
 
 
-class ThirdRoute extends StatelessWidget {
-  ThirdRoute({super.key});
+class SignUpWidget extends StatefulWidget {
+  @override
+  State<SignUpWidget> createState() => ThirdRoute();
+
+}
+
+class ThirdRoute extends State<SignUpWidget> {
+  late Future<Users> futureUser;
+
+  @override
+  void initState() {
+    super.initState();
+    futureUser = fetchUser();
+  }
 
   void addStuff(){
 
@@ -23,12 +48,6 @@ class ThirdRoute extends StatelessWidget {
   void loadPhoto(){
 
   }
-
-  var stuff = [Stuff('name', 'info'), Stuff('name1', 'info1'), Stuff('name', 'info'), Stuff('name1', 'info1'),
-    Stuff('name', 'info'), Stuff('name1', 'info1'), Stuff('name', 'info'), Stuff('name1', 'info1'),
-    Stuff('name', 'info'), Stuff('name1', 'info1'), Stuff('name', 'info'), Stuff('name1', 'info1'),
-    Stuff('name', 'info'), Stuff('name1', 'info1'), Stuff('name', 'info'), Stuff('name1', 'info1')];
-
 
   @override
   Widget build(BuildContext context) {
@@ -92,30 +111,73 @@ class ThirdRoute extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Stuff List'),
       ),
-      body:ListView.separated(
-        itemBuilder: (context, position) {
-          return ListTile(
-            title: Text(
-              stuff[position].name,
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-            trailing: Text(stuff[position].info),//date?
-            subtitle:Text(stuff[position].info),
-            leading: Icon(//TODO: сделать кнопку для ув. фото
-              Icons.add_a_photo,
-              color: Colors.blue[500],
-            ),
-            onLongPress: (){
-              openDialog();
-              editStuff();
-            },
-          );
+      body:
+      FutureBuilder<Users>(
+        future: futureUser,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.separated(
+              // context, position,
+              separatorBuilder: (BuildContext context, int index) => const Divider(),
 
+              itemCount: snapshot.data!.stuffList!.length,
+
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(
+                    snapshot.data!.stuffList![index].name!,
+                    // snapshot.data!.username!,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  trailing: Text(snapshot.data!.stuffList![index].date!),//date?
+                  // trailing: Text(snapshot.data!.email!),//date?
+
+                  subtitle:Text(snapshot.data!.stuffList![index].info!),
+                  // subtitle:Text(snapshot.data!.id.toString()),
+
+                  leading: Icon(//TODO: ув. фото
+                    Icons.add_a_photo,
+                    color: Colors.blue[500],
+                  ),
+                  onLongPress: (){
+                    openDialog();
+                    editStuff();
+                  },
+
+                );
+
+              },
+            );
+
+
+
+          } else if (snapshot.hasError) {
+
+            return AlertDialog(
+              title: const Text('Unexpected Error'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Text('Error : ${snapshot.error}'),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Ok'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+
+          }
+
+
+          // By default, show a loading spinner.
+          return const Center(child: CircularProgressIndicator());
         },
-        separatorBuilder: (context, index) {
-          return const Divider();
-        },
-        itemCount: stuff.length,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

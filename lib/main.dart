@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:dart/signup_screen.dart';
 import 'package:dart/user_screen.dart';
-import 'package:dart/login_screen.dart';
 
 
 void main() {
@@ -11,15 +10,6 @@ void main() {
     home: MyWidget(),
   ));
 }
-
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: FirstRoute(),
-//     );
-//   }
-// }
 
 
 class MyWidget extends StatefulWidget {
@@ -89,7 +79,7 @@ class FirstRoute extends State<MyWidget> {
             ),
           ),
           SizedBox(
-            width: 290,
+            width: 210,
             height: 50,
             child: CheckboxListTile(
               title: const Text("Remember me"),
@@ -112,7 +102,7 @@ class FirstRoute extends State<MyWidget> {
                 Navigator.push(
                   context,
                   // if (verification(login, password))=>
-                  MaterialPageRoute(builder: (context) => ThirdRoute()),
+                  MaterialPageRoute(builder: (context) => SignUpWidget()),
                 );
               },
             ),
