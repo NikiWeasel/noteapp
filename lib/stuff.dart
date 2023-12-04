@@ -34,15 +34,15 @@ class Users {
 }
 
 class StuffList {
-  String? name;
+  String? title;
   String? info;
   String? date;
   String? photo;
 
-  StuffList({this.name, this.info, this.date, this.photo});
+  StuffList({this.title, this.info, this.date, this.photo});
 
   StuffList.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
+    title = json['name'];
     info = json['info'];
     date = json['date'];
     photo = json['photo'];
@@ -50,7 +50,7 @@ class StuffList {
 
   Map<String, dynamic> toJson(){
     final Map<String, dynamic> data = Map<String, dynamic>();
-    data['name'] = name;
+    data['name'] = title;//TODO: сменить name + добавить content
     data['info'] = info;
     data['date'] = date;
     data['photo'] = photo;

@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:dart/signup_screen.dart';
 import 'package:dart/user_screen.dart';
+import 'package:dio/dio.dart';
 
 
 void main() {
-  runApp(MaterialApp(
-    title: 'Navigation Basics',
-    home: MyWidget(),
-  ));
+  // final Dio
+  runApp(const MaterialApp());
 }
 
 

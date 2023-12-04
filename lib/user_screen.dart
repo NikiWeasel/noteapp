@@ -3,14 +3,22 @@ import 'stuff.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:getwidget/getwidget.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+import 'dart:io';
+// import 'package:fluttertoast/fluttertoast.dart';
+
 
 
 Future<Users> fetchUser() async {
-  final response = await http.get(Uri.parse('https://my-json-server.typicode.com/NikiWeasel/demo1/users/1'));
+  final response = await http.get(Uri.parse
+    ('https://my-json-server.typicode.com/NikiWeasel/demo1/users/1'));
+  
   //https://my-json-server.typicode.com/NikiWeasel/demo1/users/1
   //http://192.168.0.106/users/1
   //http://localhost:3000/users/1
-  //https://my-json-server.typicode.com/NikiWeasel/demo/users/1
 
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
@@ -49,6 +57,27 @@ class ThirdRoute extends State<SignUpWidget> {
 
   }
 
+  void imagePicker() async {
+    ImagePicker picker = ImagePicker();
+    XFile? fileData = await picker.pickImage(source: ImageSource.gallery);
+    // if (fileData=!null){return;}
+
+
+    var imageBytes = await fileData?.readAsBytes();
+    // print(imageBytes);
+    String base64Image = base64Encode(imageBytes!);
+    print(base64Image);
+    // Fluttertoast.showToast(
+    //     msg: base64Image,
+    //     toastLength: Toast.LENGTH_SHORT,
+    //     gravity: ToastGravity.CENTER,
+    //     timeInSecForIosWeb: 1,
+    //     backgroundColor: Colors.red,
+    //     textColor: Colors.white,
+    //     fontSize: 16.0
+    // );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -60,11 +89,15 @@ class ThirdRoute extends State<SignUpWidget> {
           height: 250,
           child: Column(
             children: [
-              TextButton(
-                child:const Icon(
-                  Icons.add_a_photo,
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: TextButton(
+                  child:const Icon(
+                    Icons.add_a_photo,
+                    size: 50,
+                  ),
+                  onPressed: (){imagePicker();},
                 ),
-                onPressed: (){loadPhoto();},
               ),
               const TextField(
                   keyboardType: TextInputType.none,
@@ -106,6 +139,26 @@ class ThirdRoute extends State<SignUpWidget> {
 
     );
 
+    Future openListtile()=> showDialog(
+      context: context,
+      builder: (context)=> Container(
+        width: 200,
+        height: 500,
+        child: Column(
+          children:[
+            Row(
+              children: [
+                Image.asset('assets/images/cat.png',width:80,height:80),
+
+              ],
+            )
+
+          ]
+        ),
+      )
+
+    );
+
 
     return Scaffold(
       appBar: AppBar(
@@ -123,28 +176,36 @@ class ThirdRoute extends State<SignUpWidget> {
               itemCount: snapshot.data!.stuffList!.length,
 
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(
-                    snapshot.data!.stuffList![index].name!,
-                    // snapshot.data!.username!,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  trailing: Text(snapshot.data!.stuffList![index].date!),//date?
-                  // trailing: Text(snapshot.data!.email!),//date?
+                return GFListTile(
+                    avatar:Image.asset('assets/images/cat.png',width:80,height:80),
+                    titleText:snapshot.data!.stuffList![index].title!,
+                    subTitleText:snapshot.data!.stuffList![index].date!,
+                    icon: Icon(Icons.favorite,color:Colors.red),
+                  description: Text(snapshot.data!.stuffList![index].info!),
 
-                  subtitle:Text(snapshot.data!.stuffList![index].info!),
-                  // subtitle:Text(snapshot.data!.id.toString()),
-
-                  leading: Icon(//TODO: ув. фото
-                    Icons.add_a_photo,
-                    color: Colors.blue[500],
-                  ),
                   onLongPress: (){
                     openDialog();
                     editStuff();
                   },
-
                 );
+
+                //   ListTile(
+                //   title: Text(
+                //     snapshot.data!.stuffList![index].name!,
+                //     style: const TextStyle(fontWeight: FontWeight.w500),
+                //   ),
+                //   trailing: Text(snapshot.data!.stuffList![index].date!),
+                //   subtitle:Text(snapshot.data!.stuffList![index].info!),
+                //   leading: Icon(//TODO: ув. фото
+                //     Icons.add_a_photo,
+                //     color: Colors.blue[500],
+                //   ),
+                //   onLongPress: (){
+                //     openDialog();
+                //     editStuff();
+                //   },
+                //
+                // );
 
               },
             );
