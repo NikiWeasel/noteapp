@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:dart/server/rest_client.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'screens/login_screen.dart';
 
@@ -21,22 +25,31 @@ void main() {
   restClient = RestClient(dio);
   runApp(MaterialApp(
     theme: ThemeData(
+        // scaffoldBackgroundColor: Colors.grey,
         // colorScheme: ColorScheme.dark(),
-        // primaryColor: Colors.black54,
-        // hintColor: Colors.red,
-        // floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(2, 2, 2),
+
         ),
     home: LoginWidget(),
   ));
 }
 
-/*
-*todo: Переименовать getuserlist
-ЗАПОМНИ МЕНЯ + кэшировпние
-Экран?/
-тема
-* toast'ы
-* проверить исключения dio
+class Base64 {
+  static Uint8List base64decode(String base64String) {
+    var uint8image = const Base64Decoder().convert(base64String);
+    return uint8image;
+  }
 
-json-server --host 192.168.0.106 C:\Users\Dns\Documents\dart_flutter\dart\lib\server\db.json --port 8000
-* */
+  String base64encode(Uint8List uint8image) {
+    var base64String = const Base64Encoder().convert(uint8image);
+    return base64String;
+  }
+
+  Future<String> imagePicker() async {
+    final picker = ImagePicker();
+    final fileData = await picker.pickImage(source: ImageSource.gallery);
+    final imageBytes = await fileData?.readAsBytes();
+
+    var base64Image = base64Encode(imageBytes!);
+    return base64Image;
+  }
+}

@@ -4,6 +4,7 @@ import 'package:dart/screens/signup_screen.dart';
 import 'package:dart/screens/user_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // import 'package:fluttertoast/fluttertoast.dart';
 
@@ -15,20 +16,41 @@ class LoginWidget extends StatefulWidget {
 }
 
 class LoginWidgetState extends State<LoginWidget> {
+  UserData userData = UserData();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   late final UserListBloc _bloc;
+
   bool? rememberMe = false;
 
   @override
   void initState() {
     super.initState();
     _bloc = UserListBloc(restClient!);
+    autoVer();
+  }
+
+  void autoVer() async {
+    final rememberMe_ = await userData.getRemembermeStatus();
+    rememberMe = rememberMe_ ?? false;
+
+    if (rememberMe ?? false) {
+      final res = await userData.getUserEmail();
+      emailController.text = res ?? '';
+      final res1 = await userData.getUserEmail();
+      passwordController.text = res1 ?? '';
+    }
   }
 
   String? verification(
       UserNetworkState context, String emailInput, String passwordInput) {
     UserDto? user;
+
+    if (rememberMe ?? false) {
+      userData.setUserData(emailController.text, passwordController.text);
+    } else {
+      userData.deleteUserData();
+    }
     try {
       user = context.userList
           .where((p) => p.email == emailInput && p.password == passwordInput)
@@ -38,6 +60,13 @@ class LoginWidgetState extends State<LoginWidget> {
     }
 
     return user?.id;
+  }
+
+  void toUserScreen(String? userId) {
+    if (userId != null) {
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => UserWidget(userId)));
+    }
   }
 
   void _onRememberMeChanged(bool? newValue) => setState(() {
@@ -62,7 +91,7 @@ class LoginWidgetState extends State<LoginWidget> {
     return BlocBuilder<UserListBloc, UserNetworkState>(
         bloc: _bloc,
         builder: (context, snapshot) {
-          final userList = snapshot.userList;
+          // final userList = snapshot.userList;
           return Scaffold(
             body: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -80,7 +109,7 @@ class LoginWidgetState extends State<LoginWidget> {
                       maxLength: 25,
                       enabled: true,
                       maxLines: 1,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'E-mail',
                       )),
@@ -96,7 +125,7 @@ class LoginWidgetState extends State<LoginWidget> {
                       maxLength: 25,
                       enabled: true,
                       maxLines: 1,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Password',
                       )),
@@ -105,7 +134,7 @@ class LoginWidgetState extends State<LoginWidget> {
                   width: 210,
                   height: 50,
                   child: CheckboxListTile(
-                    title: const Text("Remember me"),
+                    title: const Text('Remember me'),
                     controlAffinity: ListTileControlAffinity.leading,
                     checkColor: Colors.white,
                     value: rememberMe,
@@ -117,14 +146,10 @@ class LoginWidgetState extends State<LoginWidget> {
                   height: 40,
                   child: ElevatedButton(
                     child: const Text('Log In'),
-                    onPressed: () {
+                    onPressed: () async {
                       _onLogin();
-                      var con = verification(snapshot, emailController.text,
-                          passwordController.text);
-                      if (con != null) {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => UserWidget(con)));
-                      }
+                      toUserScreen(verification(snapshot, emailController.text,
+                          passwordController.text));
                     },
                   ),
                 ),
@@ -149,5 +174,46 @@ class LoginWidgetState extends State<LoginWidget> {
             ),
           );
         });
+  }
+}
+
+class UserData {
+  late SharedPreferences prefs;
+
+  Future<void> getPref() async {
+    prefs = await SharedPreferences.getInstance();
+  }
+
+  Future<void> setUserData(String email, String password) async {
+    prefs = await SharedPreferences.getInstance();
+    await prefs.setString('email', email);
+    await prefs.setString('password', password);
+    await prefs.setBool('rememberme', true);
+  }
+
+  Future<void> deleteUserData() async {
+    prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove('email');
+    await prefs.remove('password');
+    await prefs.remove('rememberme');
+  }
+
+  Future<String?> getUserEmail() async {
+    prefs = await SharedPreferences.getInstance();
+
+    return prefs.getString('email');
+  }
+
+  Future<String?> getUserPassword() async {
+    prefs = await SharedPreferences.getInstance();
+
+    return prefs.getString('password');
+  }
+
+  Future<bool?> getRemembermeStatus() async {
+    prefs = await SharedPreferences.getInstance();
+
+    return prefs.getBool('rememberme');
   }
 }

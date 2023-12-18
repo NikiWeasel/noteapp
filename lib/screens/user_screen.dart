@@ -20,7 +20,6 @@ class UserWidget extends StatefulWidget {
 
 class UserWidgetState extends State<UserWidget> {
   late final NotesListBloc _bloc;
-  late final NotesDeleteBloc _bloc1;
 
   @override
   void initState() {
@@ -39,14 +38,24 @@ class UserWidgetState extends State<UserWidget> {
         MaterialPageRoute(builder: (context) => NoteWidget(isNew, notesDto!)));
   }
 
+  Widget getImage(String? baseString) {
+    if (baseString != null && baseString != '') {
+      return Image.memory(Base64.base64decode(baseString));
+    } else {
+      return Image.asset(
+        'assets/images/file-icon.png',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     _onRefresh();
     return BlocBuilder<NotesListBloc, NotesNetworkState>(
       bloc: _bloc,
       builder: (context, snapshot) {
-        final notesList = getNotesList(snapshot, widget.user_id);
-        // _onRefresh();
+        final notesList =
+            getNotesList(snapshot, widget.user_id).reversed.toList();
         return Scaffold(
           body: RefreshIndicator(
             onRefresh: _onRefresh,
@@ -54,8 +63,13 @@ class UserWidgetState extends State<UserWidget> {
               itemCount: notesList.length,
               itemBuilder: (context, index) {
                 return GFListTile(
-                  avatar: Image.asset('assets/images/cat.png',
-                      width: 80, height: 80),
+                  avatar: SizedBox(
+                    width: 80,
+                    height: 80,
+                    child: getImage(notesList[index].photo),
+                  ),
+                  // Image.asset('assets/images/cat.png',
+                  //     width: 80, height: 80),
                   titleText: notesList[index].title,
                   subTitleText: 'Последнее изменение: ${notesList[index].date}',
                   description: Text(

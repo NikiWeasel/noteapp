@@ -24,11 +24,13 @@ class NotesListBloc extends Bloc<NotesNetworkEvent, NotesNetworkState> {
   }
 }
 
-class NotesAddBloc extends Bloc<AddNoteEvent, NotesNetworkState1> {
+class NotesAddBloc extends Bloc<NotesPatchAddEvent, NotesNetworkState1> {
   final RestClient _networkRepository;
 
   NotesAddBloc(this._networkRepository) : super(NotesNetworkState1()) {
+    //todo переименоваит
     on<AddNoteEvent>(_onAddNote);
+    on<PatchNoteEvent>(_onPatchNote);
   }
 
   Future<void> _onAddNote(
@@ -37,6 +39,14 @@ class NotesAddBloc extends Bloc<AddNoteEvent, NotesNetworkState1> {
   ) async {
     //todo Переименовать state
     await restClient!.addNote(event.newNote);
+  }
+
+  //
+  Future<void> _onPatchNote(
+    PatchNoteEvent event,
+    Emitter<NotesNetworkState1> emit,
+  ) async {
+    await restClient!.updateNote(event.note.id.toString(), event.note);
   }
 }
 
@@ -59,10 +69,10 @@ class NotesPatchBloc extends Bloc<DelNoteEvent, NotesNetworkState1> {
   final RestClient _networkRepository;
 
   NotesPatchBloc(this._networkRepository) : super(NotesNetworkState1()) {
-    on<DelNoteEvent>(_onDelNote);
+    on<DelNoteEvent>(_onPatchNote);
   }
 
-  Future<void> _onDelNote(
+  Future<void> _onPatchNote(
     DelNoteEvent event,
     Emitter<NotesNetworkState1> emit,
   ) async {
