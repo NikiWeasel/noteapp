@@ -1,10 +1,6 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:dart/screens/notes_bloc/notes_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../dto/notes_dto.dart';
@@ -23,41 +19,35 @@ class NoteWidget extends StatefulWidget {
 class Note_screen extends State<NoteWidget> {
   late final NotesAddBloc _bloc;
 
+  // String? imageString;
+  final base64 = Base64();
+  bool _isVisible = false;
+
   @override
   void initState() {
     super.initState();
     _bloc = NotesAddBloc(restClient!);
-  }
-
-  Future<String> imagePicker() async {
-    ImagePicker picker = ImagePicker();
-    XFile? fileData = await picker.pickImage(source: ImageSource.gallery);
-
-    // if (fileData=!null){return;}
-
-    var imageBytes = await fileData?.readAsBytes();
-    // print(imageBytes);
-    String base64Image = base64Encode(imageBytes!);
-    return base64Image;
-    // Fluttertoast.showToast(
-    //     msg: base64Image,
-    //     toastLength: Toast.LENGTH_SHORT,
-    //     gravity: ToastGravity.CENTER,
-    //     timeInSecForIosWeb: 1,
-    //     backgroundColor: Colors.red,
-    //     textColor: Colors.white,
-    //     fontSize: 16.0
-    // );
+    setPictureVisibility(widget.note.photo!);
   }
 
   void saveNote(NotesDto newNote) {
     if (newNote != widget.note) {
-      //todo ????
       if (widget.isNew) {
         _addNote(newNote);
       } else {
-        // _patchNote();//todo редактирование ААААА
+        newNote.id = widget.note.id;
+        _patchNote(newNote);
       }
+    }
+  }
+
+  void setPictureVisibility(String? image) {
+    if (image != null && image != '') {
+      setState(() {
+        _isVisible = true;
+      });
+    } else {
+      _isVisible = false;
     }
   }
 
@@ -65,20 +55,15 @@ class Note_screen extends State<NoteWidget> {
     _bloc.add(AddNoteEvent(newNote));
   }
 
-  // Future<void> _patchNote() async {//todo patch
-  //   _bloc.add();
-  // }
-
-  Uint8List base64decode(String base64String) {
-    var uint8image = const Base64Decoder().convert(base64String);
-    return uint8image;
+  Future<void> _patchNote(NotesDto newNote) async {
+    _bloc.add(PatchNoteEvent(newNote));
   }
 
   @override
   Widget build(BuildContext context) {
     final titleController = TextEditingController(text: widget.note.title);
     final contentController = TextEditingController(text: widget.note.content);
-    return BlocBuilder<NotesAddBloc, NotesNetworkState1>(
+    return BlocBuilder<NotesAddBloc, NoteDtoState>(
       bloc: _bloc,
       builder: (context, snapshot) {
         return Scaffold(
@@ -87,23 +72,32 @@ class Note_screen extends State<NoteWidget> {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
+                    Visibility(
+                        visible: _isVisible,
+                        child: SizedBox(
+                          width: 320,
+                          height: 250,
+                          child: Image.memory(
+                              Base64.base64decode(widget.note.photo!)),
+                        )),
                     TextField(
                         style: const TextStyle(
                             fontSize: 30, fontWeight: FontWeight.bold),
                         decoration:
                             const InputDecoration(border: InputBorder.none),
                         autofocus: false,
-                        maxLines: null,
+                        maxLines: 1,
                         controller: titleController),
                     Text('Последнее изменение: ${widget.note.date.toString()}'),
                     SizedBox(
                       height: 500,
                       child: TextField(
                           keyboardType: TextInputType.multiline,
-                          decoration: InputDecoration(border: InputBorder.none),
+                          decoration:
+                              const InputDecoration(border: InputBorder.none),
                           autofocus: true,
                           maxLines: null,
                           controller: contentController),
@@ -124,17 +118,19 @@ class Note_screen extends State<NoteWidget> {
                       titleController.text,
                       contentController.text,
                       DateFormat('dd.MM.yyyy').format(DateTime.now()),
-                      '',
+                      widget.note.photo,
                     );
-                    saveNote(newNote); //const Icon(Icons.file_copy_outlined)
+                    saveNote(newNote);
                   },
                   child: const Icon(Icons.file_copy_outlined),
                 ),
               ),
               FloatingActionButton(
                 heroTag: null,
-                onPressed: () {
-                  imagePicker();
+                onPressed: () async {
+                  final res = await base64.imagePicker();
+                  widget.note.photo = res;
+                  setPictureVisibility(widget.note.photo);
                 },
                 child: const Icon(Icons.image),
               ),
@@ -144,24 +140,4 @@ class Note_screen extends State<NoteWidget> {
       },
     );
   }
-}
-
-void imagePicker() async {
-  ImagePicker picker = ImagePicker();
-  XFile? fileData = await picker.pickImage(source: ImageSource.gallery);
-  // if (fileData=!null){return;}
-
-  var imageBytes = await fileData?.readAsBytes();
-  // print(imageBytes);
-  String base64Image = base64Encode(imageBytes!);
-  print(base64Image);
-  // Fluttertoast.showToast(
-  //     msg: base64Image,
-  //     toastLength: Toast.LENGTH_SHORT,
-  //     gravity: ToastGravity.CENTER,
-  //     timeInSecForIosWeb: 1,
-  //     backgroundColor: Colors.red,
-  //     textColor: Colors.white,
-  //     fontSize: 16.0
-  // );
 }

@@ -1,15 +1,15 @@
 part of 'notes_bloc.dart';
 
-class NotesNetworkState {
+class NotesListState {
   final List<NotesDto> notesList;
 
-  const NotesNetworkState({
+  const NotesListState({
     this.notesList = const [],
   });
 }
 
-class NotesNetworkState1 {
+class NoteDtoState {
   final NotesDto? note;
 
-  NotesNetworkState1({this.note});
+  NoteDtoState({this.note});
 }

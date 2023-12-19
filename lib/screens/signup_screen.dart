@@ -22,7 +22,7 @@ class SignupWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserAddBloc, UserNetworkState1>(
+    return BlocBuilder<UserAddBloc, UserDtoState>(
         bloc: _bloc,
         builder: (context, snapshot) {
           // final userList = snapshot.user;
