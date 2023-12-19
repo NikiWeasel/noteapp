@@ -1,15 +1,15 @@
 part of 'user_bloc.dart';
 
-class UserNetworkState {
+class UserListState {
   final List<UserDto> userList;
 
-  const UserNetworkState({
+  const UserListState({
     this.userList = const [],
   });
 }
 
-class UserNetworkState1 {
+class UserDtoState {
   final UserDto? user;
 
-  UserNetworkState1({this.user});
+  UserDtoState({this.user});
 }

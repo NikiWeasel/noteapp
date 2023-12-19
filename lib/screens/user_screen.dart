@@ -27,7 +27,7 @@ class UserWidgetState extends State<UserWidget> {
     _bloc = NotesListBloc(restClient!);
   }
 
-  List<NotesDto> getNotesList(NotesNetworkState context, String userId) {
+  List<NotesDto> getNotesList(NotesListState context, String userId) {
     final notesList =
         context.notesList.where((p) => p.user_id == userId).toList();
     return notesList;
@@ -51,7 +51,7 @@ class UserWidgetState extends State<UserWidget> {
   @override
   Widget build(BuildContext context) {
     _onRefresh();
-    return BlocBuilder<NotesListBloc, NotesNetworkState>(
+    return BlocBuilder<NotesListBloc, NotesListState>(
       bloc: _bloc,
       builder: (context, snapshot) {
         final notesList =
@@ -101,6 +101,7 @@ class UserWidgetState extends State<UserWidget> {
                   '',
                 ),
               );
+              // _onRefresh();
             },
             child: const Icon(Icons.add),
           ),

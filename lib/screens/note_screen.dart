@@ -63,7 +63,7 @@ class Note_screen extends State<NoteWidget> {
   Widget build(BuildContext context) {
     final titleController = TextEditingController(text: widget.note.title);
     final contentController = TextEditingController(text: widget.note.content);
-    return BlocBuilder<NotesAddBloc, NotesNetworkState1>(
+    return BlocBuilder<NotesAddBloc, NoteDtoState>(
       bloc: _bloc,
       builder: (context, snapshot) {
         return Scaffold(

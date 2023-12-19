@@ -28,6 +28,7 @@ class LoginWidgetState extends State<LoginWidget> {
     super.initState();
     _bloc = UserListBloc(restClient!);
     autoVer();
+    _onLogin();
   }
 
   void autoVer() async {
@@ -39,11 +40,13 @@ class LoginWidgetState extends State<LoginWidget> {
       emailController.text = res ?? '';
       final res1 = await userData.getUserEmail();
       passwordController.text = res1 ?? '';
+
+      // toUserScreen(verification(context, emailController.text, passwordController.text))
     }
   }
 
   String? verification(
-      UserNetworkState context, String emailInput, String passwordInput) {
+      UserListState context, String emailInput, String passwordInput) {
     UserDto? user;
 
     if (rememberMe ?? false) {
@@ -88,11 +91,13 @@ class LoginWidgetState extends State<LoginWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserListBloc, UserNetworkState>(
+    return BlocBuilder<UserListBloc, UserListState>(
         bloc: _bloc,
         builder: (context, snapshot) {
           // final userList = snapshot.userList;
+          // _onLogin();
           return Scaffold(
+            extendBody: true,
             body: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -147,7 +152,7 @@ class LoginWidgetState extends State<LoginWidget> {
                   child: ElevatedButton(
                     child: const Text('Log In'),
                     onPressed: () async {
-                      _onLogin();
+                      // _onLogin();
                       toUserScreen(verification(snapshot, emailController.text,
                           passwordController.text));
                     },
